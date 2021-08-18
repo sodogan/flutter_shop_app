@@ -1,9 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/models/providers/product_list_provider.dart';
 import '/models/providers/product_provider.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
+  static const String route = '/details';
+
   const ProductDetailsScreen({Key? key}) : super(key: key);
 
   @override
@@ -22,7 +25,7 @@ class ProductDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(product.id),
+        title: Text(product.title),
       ),
       body: ProductDetails(
         product: product,
@@ -37,6 +40,45 @@ class ProductDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Card(
+            elevation: 8,
+            child: Image.network(
+              product.imageUrl,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Text(
+            product.title,
+            style: const TextStyle(fontSize: 18),
+            softWrap: true,
+          ),
+          Text(
+            product.description,
+            style: const TextStyle(
+              color: Colors.grey,
+              fontSize: 18,
+            ),
+            softWrap: true,
+            textAlign: TextAlign.center,
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Theme.of(context).primaryColor,
+              shape: BoxShape.rectangle,
+            ),
+            child: Text('\$${product.price.toString()}',
+                textAlign: TextAlign.end,
+                style: Theme.of(context).primaryTextTheme.title),
+          )
+        ],
+      ),
+    );
   }
 }
