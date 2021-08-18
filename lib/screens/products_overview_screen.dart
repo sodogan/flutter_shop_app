@@ -30,11 +30,9 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   }
 
   void onTapHandler(BuildContext context) {
-    //final args = {'product_id': productID};
     Navigator.pushNamed(
       context,
       CartOverviewScreen.route,
-      //arguments: args,
     );
   }
 
@@ -63,16 +61,16 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
               itemBuilder: builder,
             ),
             Consumer<CartProvider>(
-              builder: (context, CartProvider cartProvider, ch) => Badge(
-                child: ch!,
+              builder: (_, CartProvider cartProvider, pChild) => Badge(
+                child: pChild!,
                 value: cartProvider.itemCount.toString(),
                 color: Colors.indigo,
               ),
-              child: GestureDetector(
-                onTap: () => onTapHandler(context),
-                child: const Icon(
+              child: IconButton(
+                icon: const Icon(
                   Icons.shopping_cart,
                 ),
+                onPressed: () => onTapHandler(context),
               ),
             ),
           ],

@@ -11,15 +11,53 @@ class CartOverviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //Need to get the cart information!
-    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    final cartProvider = Provider.of<CartProvider>(context, listen: true);
 
     final List<CartItem> cartItems = cartProvider.items;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('E-Shop'),
-      ),
-      body: cartItems.isEmpty ? Text('No items') : CartItemList(),
-    );
+        appBar: AppBar(
+          title: const Text('Your Cart'),
+        ),
+        body: Column(
+          children: [
+            Card(
+              margin: const EdgeInsets.all(12),
+              elevation: 8,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Total',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    const Spacer(),
+                    Chip(
+                      label: Text('\$ ${cartProvider.totalAmount}',
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .primaryTextTheme
+                                  .title
+                                  ?.color)),
+                      backgroundColor: Theme.of(context).primaryColor,
+                    ),
+                    if (cartProvider.totalAmount > 0)
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          'ORDER NOW',
+                          style:
+                              TextStyle(color: Theme.of(context).primaryColor),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const CartItemList(),
+          ],
+        ));
   }
 }

@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/models/providers/product_list_provider.dart';
+import '/models/providers/product_provider.dart';
 
-class ProductDetailsScreen extends StatefulWidget {
-  static const String route = '/product-details';
-
+class ProductDetailsScreen extends StatelessWidget {
   const ProductDetailsScreen({Key? key}) : super(key: key);
 
-  @override
-  State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
-}
-
-class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)?.settings.arguments as Map;
@@ -30,11 +24,19 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       appBar: AppBar(
         title: Text(product.id),
       ),
-      body: Container(
-        child: Text(
-          product.description,
-        ),
+      body: ProductDetails(
+        product: product,
       ),
     );
+  }
+}
+
+class ProductDetails extends StatelessWidget {
+  final ProductProvider product;
+  const ProductDetails({Key? key, required this.product}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }
