@@ -2,14 +2,23 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
 
-typedef AddToCartFunc = void Function(String productID,
-    {required String title,
-    required String description,
-    required double price});
+typedef AddToCartFunc = void Function(
+  String productID, {
+  required String title,
+  required String description,
+  required double price,
+});
+
 typedef RemoveFromCartFunc = void Function({required int index});
+
 typedef CostBuilderFunc = double Function(double, int);
 
-abstract class Item {
+mixin builder {
+  CostBuilderFunc? defaultCostBuilder =
+      (priceVal, quantityVal) => priceVal * quantityVal;
+}
+
+abstract class CartItemBase with builder implements Comparable<CartItemBase> {
   final String _id = const Uuid().v1();
   final String _title;
   final String _description;
@@ -17,14 +26,13 @@ abstract class Item {
   int quantity;
   CostBuilderFunc? costBuilder;
 
-  Item(
+  CartItemBase(
     this._title,
     this._description,
     this._price, [
     this.quantity = 1,
   ]) {
-    this.costBuilder =
-        costBuilder ?? (priceVal, quantityVal) => priceVal * quantityVal;
+    this.costBuilder = costBuilder ?? defaultCostBuilder;
   }
 
   String get id => _id;
@@ -43,7 +51,7 @@ abstract class Item {
   }
 }
 
-class CartItem extends Item {
+class CartItem extends CartItemBase {
   final String productID;
 
   CartItem({
@@ -60,6 +68,11 @@ class CartItem extends Item {
   String toString() {
     return super.toString() + "product ID: $productID" + "quantity: $quantity";
   }
+
+  @override
+  int compareTo(CartItemBase other) {
+    return (_price - other._price).toInt();
+  }
 }
 
 abstract class CartBase {
@@ -68,6 +81,7 @@ abstract class CartBase {
       required String description,
       required double price});
   void removeFromCart({required int index});
+  void clearCart();
   int get itemCount;
   double get totalAmount;
 }
@@ -104,6 +118,13 @@ class CartProvider extends CartBase with ChangeNotifier {
   @override
   void removeFromCart({required int index}) {
     _cartItems.removeAt(index);
+    notifyListeners();
+  }
+
+//Clear the Cart
+  @override
+  void clearCart() {
+    _cartItems.clear();
     notifyListeners();
   }
 

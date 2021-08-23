@@ -1,19 +1,37 @@
 import 'package:flutter/material.dart';
-import '/models/providers/cart_provider.dart';
+import 'package:flutter_shop_app/models/providers/product_provider.dart';
 import 'package:provider/provider.dart';
-import '../widgets/cart_item_list.dart';
 
-class CartOverviewScreen extends StatelessWidget {
+import '../models/providers/order_provider.dart';
+import '/screens/order_screen.dart';
+import '../models/providers/cart_provider.dart';
+import '../widgets/cart_item_widget.dart';
+
+class CartScreen extends StatelessWidget {
   static const String route = '/cart';
 
-  const CartOverviewScreen({Key? key}) : super(key: key);
+  const CartScreen({Key? key}) : super(key: key);
+
+  void navigateToOrderScreen(
+    BuildContext context,
+    CartProvider cartProvider,
+    OrderListProvider orderListProvider,
+  ) {
+    //add the cartitems to the OrderList
+    orderListProvider.addToOrderList(
+        cartProvider.items, cartProvider.totalAmount);
+    //clear the Cart
+    cartProvider.clearCart();
+  }
 
   @override
   Widget build(BuildContext context) {
     //Need to get the cart information!
     final cartProvider = Provider.of<CartProvider>(context, listen: true);
-
     final List<CartItem> cartItems = cartProvider.items;
+
+    final orderListProvider =
+        Provider.of<OrderListProvider>(context, listen: false);
 
     return Scaffold(
         appBar: AppBar(
@@ -35,7 +53,10 @@ class CartOverviewScreen extends StatelessWidget {
                     ),
                     const Spacer(),
                     Chip(
-                      label: Text('\$ ${cartProvider.totalAmount}',
+                      label: Text(
+                          '\$ ${cartProvider.totalAmount.toStringAsFixed(
+                            2,
+                          )}',
                           style: TextStyle(
                               color: Theme.of(context)
                                   .primaryTextTheme
@@ -45,7 +66,8 @@ class CartOverviewScreen extends StatelessWidget {
                     ),
                     if (cartProvider.totalAmount > 0)
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () => navigateToOrderScreen(
+                            context, cartProvider, orderListProvider),
                         child: Text(
                           'ORDER NOW',
                           style:
@@ -56,7 +78,22 @@ class CartOverviewScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const CartItemList(),
+            Expanded(
+              child: Card(
+                margin: const EdgeInsets.all(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.builder(
+                    itemBuilder: (context, index) => CartItemWidget(
+                      cartItem: cartItems[index],
+                      index: index,
+                      removeFromCartdeleteHandler: cartProvider.removeFromCart,
+                    ),
+                    itemCount: cartItems.length,
+                  ),
+                ),
+              ),
+            )
           ],
         ));
   }

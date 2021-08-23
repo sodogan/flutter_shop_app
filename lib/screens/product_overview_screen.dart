@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shop_app/models/providers/cart_provider.dart';
-import 'package:flutter_shop_app/screens/cart_overview_screen.dart';
+import 'package:flutter_shop_app/screens/cart_screen.dart';
+import 'package:flutter_shop_app/screens/order_screen.dart';
+import 'package:flutter_shop_app/widgets/app_drawer.dart';
 import 'package:flutter_shop_app/widgets/badge.dart';
 import 'package:provider/provider.dart';
 import '../widgets/products_overview_grid.dart';
@@ -9,16 +11,16 @@ enum FilterOptions { onlyFavourites, all }
 
 typedef CallFilter = void Function({required bool isShowFavourites});
 
-class ProductsOverviewScreen extends StatefulWidget {
-  const ProductsOverviewScreen({
+class ProductOverviewScreen extends StatefulWidget {
+  const ProductOverviewScreen({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<ProductsOverviewScreen> createState() => _ProductsOverviewScreenState();
+  State<ProductOverviewScreen> createState() => _ProductsOverviewScreenState();
 }
 
-class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
+class _ProductsOverviewScreenState extends State<ProductOverviewScreen> {
   bool _isShowOnlyFavourites = false;
 
   void onShowFavourites(FilterOptions filterOptions) {
@@ -32,7 +34,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   void onTapHandler(BuildContext context) {
     Navigator.pushNamed(
       context,
-      CartOverviewScreen.route,
+      CartScreen.route,
     );
   }
 
@@ -52,31 +54,33 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
               ),
             ];
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('E-Shop'),
-          actions: [
-            PopupMenuButton(
-              onSelected: onShowFavourites,
-              icon: const Icon(Icons.more_vert),
-              itemBuilder: builder,
+      appBar: AppBar(
+        title: const Text('E-Shop'),
+        actions: [
+          PopupMenuButton(
+            onSelected: onShowFavourites,
+            icon: const Icon(Icons.more_vert),
+            itemBuilder: builder,
+          ),
+          Consumer<CartProvider>(
+            builder: (_, CartProvider cartProvider, pChild) => Badge(
+              child: pChild!,
+              value: cartProvider.itemCount.toString(),
+              color: Colors.indigo,
             ),
-            Consumer<CartProvider>(
-              builder: (_, CartProvider cartProvider, pChild) => Badge(
-                child: pChild!,
-                value: cartProvider.itemCount.toString(),
-                color: Colors.indigo,
+            child: IconButton(
+              icon: const Icon(
+                Icons.shopping_cart,
               ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.shopping_cart,
-                ),
-                onPressed: () => onTapHandler(context),
-              ),
+              onPressed: () => onTapHandler(context),
             ),
-          ],
-        ),
-        body: ProductsOverviewGrid(
-          isShowOnlyFavourites: _isShowOnlyFavourites,
-        ));
+          ),
+        ],
+      ),
+      body: ProductsOverviewGrid(
+        isShowOnlyFavourites: _isShowOnlyFavourites,
+      ),
+      drawer: const AppDrawer(),
+    );
   }
 }

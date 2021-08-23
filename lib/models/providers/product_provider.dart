@@ -2,8 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
 
 mixin Favourite on BaseProduct {
-  bool _isFavourite = false;
-  void toggleFavouriteStatus();
+  void toggleFavourite() {
+    _isFavourite = !isFavourite;
+  }
+
+  bool get isFavourite => _isFavourite;
 }
 
 abstract class BaseProduct implements Comparable<ProductProvider> {
@@ -11,8 +14,11 @@ abstract class BaseProduct implements Comparable<ProductProvider> {
   final String _title;
   final String _description;
   final double _price;
+  bool _isFavourite = false;
 
-  BaseProduct(this._title, this._description, this._price);
+  BaseProduct(this._title, this._description, this._price)
+      : assert(_price > 0, 'Price has be be > 0');
+
   @override
   int compareTo(ProductProvider other) {
     return (_price - other._price).toInt();
@@ -23,11 +29,9 @@ abstract class BaseProduct implements Comparable<ProductProvider> {
     return "id: $_id"
         "title: $_title"
         "description: $_description"
-        "isFavourite: $isFavourite"
-        "price: $_price";
+        "price: $_price"
+        "isFavourite: $_isFavourite";
   }
-
-  bool get isFavourite;
 
   String get id => _id;
   String get title => _title;
@@ -45,14 +49,10 @@ class ProductProvider extends BaseProduct with Favourite, ChangeNotifier {
     required this.imageUrl,
   }) : super(title, description, price);
 
-  @override
   void toggleFavouriteStatus() {
-    this._isFavourite = !this._isFavourite;
+    toggleFavourite();
     notifyListeners();
   }
-
-  @override
-  bool get isFavourite => this._isFavourite;
 
   factory ProductProvider.fromJSON(Map<String, dynamic> json) {
     return ProductProvider(

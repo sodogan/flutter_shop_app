@@ -15,6 +15,8 @@ class ProductDetailsScreen extends StatelessWidget {
 
     final productID = args['product_id'] as String;
 
+    assert(productID.isNotEmpty, 'product ID can not be null or empty');
+
     final productsProvider = Provider.of<ProductListProvider>(
       context,
       listen: false,
@@ -45,10 +47,14 @@ class ProductDetails extends StatelessWidget {
         children: [
           Card(
             elevation: 8,
-            child: Image.network(
-              product.imageUrl,
-              width: double.infinity,
-              fit: BoxFit.cover,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              height: 300,
+              child: Image.network(
+                product.imageUrl,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           Text(
@@ -73,10 +79,13 @@ class ProductDetails extends StatelessWidget {
               color: Theme.of(context).primaryColor,
               shape: BoxShape.rectangle,
             ),
-            child: Text('\$${product.price.toString()}',
-                textAlign: TextAlign.end,
-                style: Theme.of(context).primaryTextTheme.title),
-          )
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Text('\$${product.price.toString()}',
+                  textAlign: TextAlign.end,
+                  style: Theme.of(context).primaryTextTheme.title),
+            ),
+          ),
         ],
       ),
     );

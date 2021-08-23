@@ -54,9 +54,14 @@ class CartItemWidget extends StatelessWidget {
               ),
             ],
           ),
-          trailing: Chip(
-            label: Text(
-              '\$${cartItem.cost.toString()}',
+          trailing: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Chip(
+              label: Text(
+                '\$${cartItem.cost.toString()}',
+                softWrap: true,
+                overflow: TextOverflow.fade,
+              ),
             ),
           ),
         ),
