@@ -20,13 +20,13 @@ class OrderScreen extends StatelessWidget {
         title: const Text('Your Orders'),
       ),
       body: list.isEmpty
-          ? Column(children: [
+          ? Column(children: const [
               Card(
                   elevation: 6,
-                  margin: const EdgeInsets.all(12),
+                  margin: EdgeInsets.all(12),
                   child: Text(
                     'No Orders yet',
-                    style: const TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18),
                   )),
             ])
           : ListView.builder(

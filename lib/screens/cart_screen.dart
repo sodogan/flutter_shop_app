@@ -16,12 +16,15 @@ class CartScreen extends StatelessWidget {
     BuildContext context,
     CartProvider cartProvider,
     OrderListProvider orderListProvider,
-  ) {
+  ) async {
     //add the cartitems to the OrderList
-    orderListProvider.addToOrderList(
-        cartProvider.items, cartProvider.totalAmount);
-    //clear the Cart
-    cartProvider.clearCart();
+    try {
+      await orderListProvider.addToOrderList(cartItems: cartProvider.items);
+      //clear the Cart
+      cartProvider.clearCart();
+    } catch (err) {
+      //Error dialog
+    }
   }
 
   @override
@@ -87,7 +90,7 @@ class CartScreen extends StatelessWidget {
                     itemBuilder: (context, index) => CartItemWidget(
                       cartItem: cartItems[index],
                       index: index,
-                      removeFromCartdeleteHandler: cartProvider.removeFromCart,
+                      removeFromCartDeleteHandler: cartProvider.removeFromCart,
                     ),
                     itemCount: cartItems.length,
                   ),

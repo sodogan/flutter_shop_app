@@ -1,5 +1,4 @@
-import 'providers/product_provider.dart';
-
+/*
 final DUMMY_PRODUCTS = [
   ProductProvider(
     title: 'Red Shirt',
@@ -29,3 +28,4 @@ final DUMMY_PRODUCTS = [
         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
   ),
 ];
+*/

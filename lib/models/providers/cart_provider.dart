@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
+import 'package:uuid/uuid.dart';
 
 typedef AddToCartFunc = void Function(
   String productID, {
@@ -19,7 +19,7 @@ mixin builder {
 }
 
 abstract class CartItemBase with builder implements Comparable<CartItemBase> {
-  final String _id = const Uuid().v1();
+  final String _id;
   final String _title;
   final String _description;
   final double _price;
@@ -27,6 +27,7 @@ abstract class CartItemBase with builder implements Comparable<CartItemBase> {
   CostBuilderFunc? costBuilder;
 
   CartItemBase(
+    this._id,
     this._title,
     this._description,
     this._price, [
@@ -55,14 +56,23 @@ class CartItem extends CartItemBase {
   final String productID;
 
   CartItem({
+    String? id,
     required this.productID,
     required String title,
     required String description,
     required double price,
-  }) : super(title, description, price, 1);
+  }) : super(id ?? const Uuid().v1(), title, description, price, 1);
 
   @override
   double get cost => costBuilder!(price, quantity);
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'productID': productID,
+        'title': title,
+        'description': description,
+        'price': price,
+      };
 
   @override
   String toString() {
@@ -82,6 +92,7 @@ abstract class CartBase {
       required double price});
   void removeFromCart({required int index});
   void clearCart();
+  void undoAddToCart(String productID);
   int get itemCount;
   double get totalAmount;
 }
@@ -118,6 +129,29 @@ class CartProvider extends CartBase with ChangeNotifier {
   @override
   void removeFromCart({required int index}) {
     _cartItems.removeAt(index);
+    notifyListeners();
+  }
+
+  @override
+  void undoAddToCart(String productID) {
+    assert(productID.isNotEmpty, 'Product ID cant be empty');
+    //First find the product
+    final _cartItem = _cartItems
+        .firstWhereOrNull((CartItem item) => item.productID == productID);
+    if (_cartItem == null) {
+      return;
+    }
+
+    //check if the quantity is > 1
+    if (_cartItem.quantity > 1) {
+      _cartItem.quantity -= 1;
+    } else if (_cartItem.quantity == 1) {
+      final index = _cartItems.indexOf(_cartItem);
+      if (index != -1) removeFromCart(index: index);
+    } else {
+      return;
+    }
+
     notifyListeners();
   }
 

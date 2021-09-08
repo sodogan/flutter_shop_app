@@ -17,7 +17,6 @@ class _OrderItemWidgetState extends State<OrderItemWidget> {
   bool _isExpanded = false;
 
   void toggleDetailOnOff() {
-    print('Toggle detail');
     setState(() {
       _isExpanded = !_isExpanded;
     });
@@ -31,36 +30,34 @@ class _OrderItemWidgetState extends State<OrderItemWidget> {
       elevation: 6,
       child: Column(
         children: [
-          Container(
-            child: ListTile(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Total',
+          ListTile(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Total',
+                  softWrap: true,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Chip(
+                  label: Text(
+                    '\$${widget.orderItem.totalAmount.toString()}',
                     softWrap: true,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold),
                   ),
-                  Chip(
-                    label: Text(
-                      '\$${widget.orderItem.totalAmount.toString()}',
-                      softWrap: true,
-                      style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-              subtitle: Text(
-                _dateFormatted,
-              ),
-              trailing: IconButton(
-                icon: _isExpanded
-                    ? const Icon(Icons.expand_less)
-                    : const Icon(Icons.expand_more),
-                onPressed: toggleDetailOnOff,
-              ),
+                ),
+              ],
+            ),
+            subtitle: Text(
+              _dateFormatted,
+            ),
+            trailing: IconButton(
+              icon: _isExpanded
+                  ? const Icon(Icons.expand_less)
+                  : const Icon(Icons.expand_more),
+              onPressed: toggleDetailOnOff,
             ),
           ),
           if (_isExpanded)
@@ -91,7 +88,9 @@ class _OrderItemWidgetState extends State<OrderItemWidget> {
                             backgroundColor: Colors.white10,
                             avatar: CircleAvatar(
                               backgroundColor: Colors.white,
-                              child: Text('${(index + 1).toString()}'),
+                              child: Text(
+                                (index + 1).toString(),
+                              ),
                             ),
                           ),
                           Text('${_cartItem.quantity} x \$${_cartItem.price}')

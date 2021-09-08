@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:uuid/uuid.dart';
+import '../../utility/firebase_utility.dart' as firebase;
 
 mixin Favourite on BaseProduct {
   void toggleFavourite() {
@@ -7,17 +7,24 @@ mixin Favourite on BaseProduct {
   }
 
   bool get isFavourite => _isFavourite;
+  set isFavourite(bool value) {
+    _isFavourite = value;
+  }
 }
 
 abstract class BaseProduct implements Comparable<ProductProvider> {
-  final String _id = const Uuid().v1();
+  final String _id;
   final String _title;
   final String _description;
   final double _price;
   bool _isFavourite = false;
 
-  BaseProduct(this._title, this._description, this._price)
-      : assert(_price > 0, 'Price has be be > 0');
+  BaseProduct(
+    this._id,
+    this._title,
+    this._description,
+    this._price,
+  );
 
   @override
   int compareTo(ProductProvider other) {
@@ -33,7 +40,7 @@ abstract class BaseProduct implements Comparable<ProductProvider> {
         "isFavourite: $_isFavourite";
   }
 
-  String get id => _id;
+  get id => _id;
   String get title => _title;
   String get description => _description;
   double get price => _price;
@@ -43,25 +50,65 @@ class ProductProvider extends BaseProduct with Favourite, ChangeNotifier {
   final String imageUrl;
 
   ProductProvider({
+    required String id,
     required String title,
     required String description,
     required double price,
     required this.imageUrl,
-  }) : super(title, description, price);
+  }) : super(id, title, description, price);
 
-  void toggleFavouriteStatus() {
+  ProductProvider.empty()
+      : imageUrl = '',
+        super('', '', '', 0.00);
+
+//Need to update the favourite using http
+  void toggleFavouriteStatus({required String id}) async {
+    //optimistic update
     toggleFavourite();
+
+    try {
+      await firebase.FirebaseUtility().updateFirebaseAsync(id: id, jsonData: {
+        'isFavourite': _isFavourite,
+      });
+    } catch (err) {
+      //rollback
+      toggleFavourite();
+    }
+
     notifyListeners();
   }
 
   factory ProductProvider.fromJSON(Map<String, dynamic> json) {
+    assert((json['id'] as String).isNotEmpty, 'ID can not be empty!');
     return ProductProvider(
+      id: json['id'],
       title: json['title'],
       description: json['description'],
       imageUrl: json['imageUrl'],
       price: json['price'] is int ? json['price'].toDouble() : json['price'],
     );
   }
+
+  ProductProvider copyWith(
+      {String? anyID,
+      String? anyTitle,
+      String? anyDescription,
+      double? anyPrice,
+      String? anyImageUrl}) {
+    return ProductProvider(
+        id: anyID ?? id,
+        title: anyTitle ?? title,
+        description: anyDescription ?? description,
+        price: anyPrice ?? price,
+        imageUrl: anyImageUrl ?? imageUrl);
+  }
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'description': description,
+        'price': price,
+        'imageUrl': imageUrl,
+      };
 
   @override
   String toString() {

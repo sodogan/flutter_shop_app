@@ -19,6 +19,30 @@ class ProductItem extends StatelessWidget {
     );
   }
 
+//Add to the Cart
+  void addToCartHandler(CartProvider cartProvider,
+      ProductProvider productProvider, BuildContext context) {
+    final snackBar = SnackBar(
+      content: const Text('Added to the Cart'),
+      duration: const Duration(seconds: 2),
+      action: SnackBarAction(
+        label: 'UNDO',
+        onPressed: () {
+          cartProvider.undoAddToCart(productProvider.id);
+        },
+      ),
+    );
+
+    cartProvider.addToCart(productProvider.id,
+        title: productProvider.title,
+        description: productProvider.description,
+        price: productProvider.price);
+
+//Hide the current snackbar!
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   @override
   Widget build(BuildContext context) {
     final productProvider =
@@ -33,7 +57,8 @@ class ProductItem extends StatelessWidget {
               icon: productProvider.isFavourite
                   ? const Icon(Icons.favorite)
                   : const Icon(Icons.favorite_border),
-              onPressed: productProvider.toggleFavouriteStatus,
+              onPressed: () =>
+                  productProvider.toggleFavouriteStatus(id: productProvider.id),
               color: Theme.of(context).accentColor,
             ),
           ),
@@ -47,10 +72,11 @@ class ProductItem extends StatelessWidget {
               icon: const Icon(
                 Icons.shopping_cart,
               ),
-              onPressed: () => cartProvider.addToCart(productProvider.id,
-                  title: productProvider.title,
-                  description: productProvider.description,
-                  price: productProvider.price),
+              onPressed: () => addToCartHandler(
+                cartProvider,
+                productProvider,
+                context,
+              ),
               color: Theme.of(context).accentColor,
             ),
           ),

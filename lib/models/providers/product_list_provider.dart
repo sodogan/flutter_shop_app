@@ -1,13 +1,32 @@
 import 'dart:collection';
-
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_shop_app/models/dummy_data.dart';
-
 import 'product_provider.dart';
+import '../../utility/firebase_utility.dart' as firebase;
 
-class ProductListProvider with ChangeNotifier {
-  List<ProductProvider> _productList = DUMMY_PRODUCTS;
+mixin ListFunctions {}
 
+abstract class ListProvider {
+  List<ProductProvider> _productList = [];
+
+  void addProduct({
+    required String title,
+    required String description,
+    required String imageUrl,
+    required double price,
+  });
+
+  void updateExistingProduct({
+    required String id,
+    required String title,
+    required String description,
+    required String imageUrl,
+    required double price,
+  });
+
+  removeProduct({required int index});
+}
+
+class ProductListProvider extends ListProvider with ChangeNotifier {
 /* APP -WIDE FILTER -WE DO NOT WANT-WE NEED LOCAL FILTER SO COMMENTED OUT
   bool _isShowOnlyFavourites = false;
 
@@ -35,27 +54,131 @@ class ProductListProvider with ChangeNotifier {
     );
   }
 
-  void addProduct({
+  Future<void> fetchNewProducts() async {
+    try {
+      final Map<String, dynamic> _products =
+          await firebase.FirebaseUtility().fetchAllFirebaseAsync();
+
+      //transform the data which is a Map of Maps
+      _products.forEach((productID, value) {
+        final _index =
+            _productList.indexWhere((product) => product.id == productID);
+        if (_index == -1) {
+          value['id'] = productID;
+          final _product = ProductProvider.fromJSON(value);
+          _productList.add(_product);
+        }
+      });
+      notifyListeners();
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  Future<void> fetchAllProducts() async {
+    try {
+      final Map<String, dynamic> _products =
+          await firebase.FirebaseUtility().fetchAllFirebaseAsync();
+
+      //transform the data which is a Map of Maps
+      _products.forEach((productID, value) {
+        value['id'] = productID;
+        final _product = ProductProvider.fromJSON(value);
+        // to read the isFavourite
+        _product.isFavourite = value['isFavourite'];
+        _productList.add(_product);
+      });
+      notifyListeners();
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> addProduct({
+    required String title,
+    required String description,
+    required String imageUrl,
+    required double price,
+  }) async {
+//Need to use the firebaseutil
+    try {
+      final _json = {
+        'title': title,
+        'description': description,
+        'price': price,
+        'imageUrl': imageUrl,
+        'isFavourite': false
+      };
+      final _id = await firebase.FirebaseUtility()
+          .productFirebaseAsyncPost(jsonData: _json);
+      //set the generated id
+      final _newProduct = ProductProvider(
+          id: _id,
+          title: title,
+          description: description,
+          price: price,
+          imageUrl: imageUrl);
+      _productList.add(_newProduct);
+      notifyListeners();
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> updateExistingProduct({
     required String id,
     required String title,
     required String description,
     required String imageUrl,
     required double price,
-  }) {
-    _productList.add(
-      ProductProvider(
+  }) async {
+    print('Updating Product id: $id');
+    //find the matching product!
+    final _index =
+        _productList.indexWhere((ProductProvider product) => product.id == id);
+    assert(_index != -1, 'Failed to find the matching Product ID');
+
+    final _jsonData = {
+      'title': title,
+      'description': description,
+      'imageUrl': imageUrl,
+      'price': price,
+    };
+    try {
+      await firebase.FirebaseUtility()
+          .updateFirebaseAsync(id: id, jsonData: _jsonData);
+
+      //update the product
+      _productList[_index] = ProductProvider(
+          id: id,
           title: title,
           description: description,
           imageUrl: imageUrl,
-          price: price),
-    );
+          price: price);
 
-    notifyListeners();
+      notifyListeners();
+    } catch (err) {
+      rethrow;
+    }
   }
 
-  removeProduct(int index) {
-    _productList.removeAt(index);
-    notifyListeners();
+  @override
+  removeProduct({required int index}) async {
+    assert(index != -1, 'Index can not be -1');
+    final _product = productList[index];
+
+    //removing an item
+    try {
+      await firebase.FirebaseUtility().deleteFirebaseAsync(id: _product.id);
+      //remove the item
+
+      _productList.removeAt(index);
+      notifyListeners();
+    } catch (err) {
+      rethrow;
+    }
   }
 
   ProductProvider findFirsMatching({required String productID}) {

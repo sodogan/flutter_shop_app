@@ -3,20 +3,20 @@ import '../models/providers/cart_provider.dart';
 
 class CartItemWidget extends StatelessWidget {
   final CartItem cartItem;
-  final RemoveFromCartFunc removeFromCartdeleteHandler;
+  final RemoveFromCartFunc removeFromCartDeleteHandler;
   final int index;
 
   const CartItemWidget({
     Key? key,
     required this.cartItem,
-    required this.removeFromCartdeleteHandler,
+    required this.removeFromCartDeleteHandler,
     required this.index,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      onDismissed: (_) => removeFromCartdeleteHandler(index: index),
+      onDismissed: (_) => removeFromCartDeleteHandler(index: index),
       key: ValueKey(cartItem.id),
       direction: DismissDirection.endToStart,
       background: Container(
@@ -66,6 +66,31 @@ class CartItemWidget extends StatelessWidget {
           ),
         ),
       ),
+      confirmDismiss: (_) {
+        return showDialog<bool>(
+          context: context,
+          builder: (cntx) {
+            return AlertDialog(
+              title: const Text(
+                'Are you sure?',
+              ),
+              content: const Text(
+                'Do you want to remove the item from the cart?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(cntx).pop(false),
+                  child: const Text('No'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(cntx).pop(true),
+                  child: const Text('Yes'),
+                )
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
