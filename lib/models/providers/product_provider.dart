@@ -40,7 +40,7 @@ abstract class BaseProduct implements Comparable<ProductProvider> {
         "isFavourite: $_isFavourite";
   }
 
-  get id => _id;
+  String get id => _id;
   String get title => _title;
   String get description => _description;
   double get price => _price;

@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_shop_app/models/providers/product_provider.dart';
 import 'package:provider/provider.dart';
-
 import '../models/providers/order_provider.dart';
-import '/screens/order_screen.dart';
 import '../models/providers/cart_provider.dart';
 import '../widgets/cart_item_widget.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   static const String route = '/cart';
 
   const CartScreen({Key? key}) : super(key: key);
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  var _isLoading = false;
 
   void navigateToOrderScreen(
     BuildContext context,
@@ -19,11 +23,17 @@ class CartScreen extends StatelessWidget {
   ) async {
     //add the cartitems to the OrderList
     try {
+      setState(() {
+        _isLoading = true;
+      });
       await orderListProvider.addToOrderList(cartItems: cartProvider.items);
       //clear the Cart
       cartProvider.clearCart();
+      setState(() {
+        _isLoading = false;
+      });
     } catch (err) {
-      //Error dialog
+      //Show Error dialog
     }
   }
 
@@ -40,64 +50,67 @@ class CartScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Your Cart'),
         ),
-        body: Column(
-          children: [
-            Card(
-              margin: const EdgeInsets.all(12),
-              elevation: 8,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Total',
-                      style: TextStyle(fontSize: 20),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  Card(
+                    margin: const EdgeInsets.all(12),
+                    elevation: 8,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Total',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          const Spacer(),
+                          Chip(
+                            label: Text(
+                                '\$ ${cartProvider.totalAmount.toStringAsFixed(
+                                  2,
+                                )}',
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .primaryTextTheme
+                                        .headline6
+                                        ?.color)),
+                            backgroundColor: Theme.of(context).primaryColor,
+                          ),
+                          if (cartProvider.totalAmount > 0)
+                            TextButton(
+                              onPressed: () => navigateToOrderScreen(
+                                  context, cartProvider, orderListProvider),
+                              child: Text(
+                                'ORDER NOW',
+                                style: TextStyle(
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                    const Spacer(),
-                    Chip(
-                      label: Text(
-                          '\$ ${cartProvider.totalAmount.toStringAsFixed(
-                            2,
-                          )}',
-                          style: TextStyle(
-                              color: Theme.of(context)
-                                  .primaryTextTheme
-                                  .title
-                                  ?.color)),
-                      backgroundColor: Theme.of(context).primaryColor,
-                    ),
-                    if (cartProvider.totalAmount > 0)
-                      TextButton(
-                        onPressed: () => navigateToOrderScreen(
-                            context, cartProvider, orderListProvider),
-                        child: Text(
-                          'ORDER NOW',
-                          style:
-                              TextStyle(color: Theme.of(context).primaryColor),
+                  ),
+                  Expanded(
+                    child: Card(
+                      margin: const EdgeInsets.all(12),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ListView.builder(
+                          itemBuilder: (context, index) => CartItemWidget(
+                            cartItem: cartItems[index],
+                            index: index,
+                            removeFromCartDeleteHandler:
+                                cartProvider.removeFromCart,
+                          ),
+                          itemCount: cartItems.length,
                         ),
                       ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: Card(
-                margin: const EdgeInsets.all(12),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListView.builder(
-                    itemBuilder: (context, index) => CartItemWidget(
-                      cartItem: cartItems[index],
-                      index: index,
-                      removeFromCartDeleteHandler: cartProvider.removeFromCart,
                     ),
-                    itemCount: cartItems.length,
-                  ),
-                ),
-              ),
-            )
-          ],
-        ));
+                  )
+                ],
+              ));
   }
 }

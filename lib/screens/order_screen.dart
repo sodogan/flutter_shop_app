@@ -4,38 +4,66 @@ import 'package:flutter_shop_app/widgets/app_drawer.dart';
 import 'package:provider/provider.dart';
 import '../models/providers/order_provider.dart' as order;
 
-class OrderScreen extends StatelessWidget {
+class OrderScreen extends StatefulWidget {
   static const String route = '/orders';
 
   const OrderScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final orderListProvider =
-        Provider.of<order.OrderListProvider>(context, listen: false);
-    final list = orderListProvider.orderList;
+  State<OrderScreen> createState() => _OrderScreenState();
+}
 
+class _OrderScreenState extends State<OrderScreen> {
+  var _isLoading = false;
+
+//  Future getOrderData =
+
+  @override
+  void initState() {
+    super.initState();
+
+    //try to load all the orders from the URL
+    Future.delayed(Duration.zero, () async {
+      setState(() {
+        _isLoading = true;
+      });
+      final _orderListProvider =
+          Provider.of<order.OrderListProvider>(context, listen: false);
+
+      try {
+        await _orderListProvider.fetchAllOrders();
+        setState(() {
+          _isLoading = false;
+        });
+      } catch (err) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Orders'),
       ),
-      body: list.isEmpty
-          ? Column(children: const [
-              Card(
-                  elevation: 6,
-                  margin: EdgeInsets.all(12),
-                  child: Text(
-                    'No Orders yet',
-                    style: TextStyle(fontSize: 18),
-                  )),
-            ])
-          : ListView.builder(
-              itemBuilder: (context, index) {
-                return OrderItemWidget(
-                  orderItem: list[index],
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Consumer<order.OrderListProvider>(
+              builder: (cntx, orderListProvider, child) {
+                final list = orderListProvider.orderList;
+
+                return ListView.builder(
+                  itemBuilder: (context, index) {
+                    return OrderItemWidget(
+                      orderItem: list[index],
+                    );
+                  },
+                  itemCount: list.length,
                 );
               },
-              itemCount: list.length,
             ),
       drawer: const AppDrawer(),
     );

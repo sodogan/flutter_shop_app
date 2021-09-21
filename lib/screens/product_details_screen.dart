@@ -83,7 +83,7 @@ class ProductDetails extends StatelessWidget {
               padding: const EdgeInsets.all(4),
               child: Text('\$${product.price.toString()}',
                   textAlign: TextAlign.end,
-                  style: Theme.of(context).primaryTextTheme.title),
+                  style: Theme.of(context).primaryTextTheme.headline6),
             ),
           ),
         ],

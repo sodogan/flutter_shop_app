@@ -6,8 +6,6 @@ import '../../utility/firebase_utility.dart' as firebase;
 mixin ListFunctions {}
 
 abstract class ListProvider {
-  List<ProductProvider> _productList = [];
-
   void addProduct({
     required String title,
     required String description,
@@ -27,6 +25,10 @@ abstract class ListProvider {
 }
 
 class ProductListProvider extends ListProvider with ChangeNotifier {
+  List<ProductProvider> _productList = [];
+
+  String? authToken;
+
 /* APP -WIDE FILTER -WE DO NOT WANT-WE NEED LOCAL FILTER SO COMMENTED OUT
   bool _isShowOnlyFavourites = false;
 
@@ -56,8 +58,8 @@ class ProductListProvider extends ListProvider with ChangeNotifier {
 
   Future<void> fetchNewProducts() async {
     try {
-      final Map<String, dynamic> _products =
-          await firebase.FirebaseUtility().fetchAllFirebaseAsync();
+      final Map<String, dynamic> _products = await firebase.FirebaseUtility()
+          .fetchAllProductsFirebaseAsync(idToken: authToken!);
 
       //transform the data which is a Map of Maps
       _products.forEach((productID, value) {
@@ -77,21 +79,33 @@ class ProductListProvider extends ListProvider with ChangeNotifier {
 
   Future<void> fetchAllProducts() async {
     try {
-      final Map<String, dynamic> _products =
-          await firebase.FirebaseUtility().fetchAllFirebaseAsync();
+      final Map<String, dynamic> _products = await firebase.FirebaseUtility()
+          .fetchAllProductsFirebaseAsync(idToken: authToken!);
 
-      //transform the data which is a Map of Maps
-      _products.forEach((productID, value) {
-        value['id'] = productID;
-        final _product = ProductProvider.fromJSON(value);
-        // to read the isFavourite
-        _product.isFavourite = value['isFavourite'];
-        _productList.add(_product);
-      });
+      _loadNewProducts(products: _products);
+
       notifyListeners();
     } catch (err) {
       rethrow;
     }
+  }
+
+  void _loadNewProducts({required Map<String, dynamic> products}) {
+    //transform the data which is a Map of Maps
+    print(_productList);
+
+    products.forEach((productID, value) {
+      value['id'] = productID;
+      //check if already exists
+
+      if (!checkExists(productID: productID)) {
+        print('is here checking $productID');
+        final _product = ProductProvider.fromJSON(value);
+        // to read the isFavourite
+        _product.isFavourite = value['isFavourite'];
+        _productList.add(_product);
+      }
+    });
   }
 
   @override
@@ -183,5 +197,9 @@ class ProductListProvider extends ListProvider with ChangeNotifier {
 
   ProductProvider findFirsMatching({required String productID}) {
     return _productList.firstWhere((element) => element.id == productID);
+  }
+
+  bool checkExists({required String productID}) {
+    return productList.any((element) => element.id == productID);
   }
 }

@@ -17,10 +17,10 @@ abstract class IOrder {
 }
 
 abstract class OrderItemBase {
-  final String _id = DateTime.now().toString();
+  final String _id;
   final DateTime _dateTime;
 
-  OrderItemBase(this._dateTime);
+  OrderItemBase(this._id, this._dateTime);
 
   DateTime get dateTime;
 
@@ -31,11 +31,15 @@ class OrderItem extends OrderItemBase {
   final List<CartItem> _cartItems;
   final double totalAmount;
 
-  OrderItem(this._cartItems, {required this.totalAmount})
+  OrderItem(this._cartItems,
+      {required String id,
+      required this.totalAmount,
+      required DateTime dateTime})
       : assert(_cartItems.isNotEmpty, 'List can not be empty'),
         assert(totalAmount > 0, 'O amount can not be order'),
         super(
-          DateTime.now(),
+          id,
+          dateTime,
         );
 
   List<Map<String, dynamic>> toJson() {
@@ -55,6 +59,9 @@ class OrderItem extends OrderItemBase {
 
 class OrderListProvider with ChangeNotifier implements IOrder {
   List<OrderItem> _orderList = [];
+
+  String? authToken;
+
   final Function defaultBuilder = (items) => items.fold(
       0.00, (previousValue, item) => (previousValue as double) + item.price);
 
@@ -79,16 +86,52 @@ class OrderListProvider with ChangeNotifier implements IOrder {
 
     //
     try {
-      await firebase.FirebaseUtility()
-          .orderFirebaseAsyncPost(orderListProvider: this);
+      final _dateTimeNow = DateTime.now();
+      final _id = await firebase.FirebaseUtility().orderFirebaseAsyncPost(
+          cartItems: cartItems,
+          totalAmount: _totalAmount,
+          dateTime: _dateTimeNow);
       _orderList.add(
-        OrderItem(cartItems, totalAmount: _totalAmount),
+        OrderItem(cartItems,
+            id: _id, totalAmount: _totalAmount, dateTime: _dateTimeNow),
       );
     } catch (err) {
       rethrow;
     }
 
     notifyListeners();
+  }
+
+  Future<void> fetchAllOrders() async {
+    try {
+      final Map<String, dynamic> _orderData = await firebase.FirebaseUtility()
+          .fetchAllOrdersFirebaseAsync(idToken: authToken!);
+      List<OrderItem> _orders = [];
+      _orderData.forEach((orderID, values) {
+        final _list = values['products'] as List;
+
+        final cartItems = _list.map((value) {
+          return CartItem(
+              productID: value['productID'],
+              title: value['title'],
+              description: value['description'],
+              price: value['price']);
+        }).toList();
+
+        final orderItem = OrderItem(cartItems,
+            totalAmount: values['totalAmount'],
+            dateTime: DateTime.parse(values['dateTime']),
+            id: orderID);
+        _orders.add(orderItem);
+      });
+
+      _orderList = _orders;
+      print('Fetched orders $_orderList');
+      notifyListeners();
+    } catch (err) {
+      print('Rethrowig from order screen');
+      rethrow;
+    }
   }
 
 //remove from the List

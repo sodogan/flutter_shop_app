@@ -1,4 +1,5 @@
 /*
+
 final DUMMY_PRODUCTS = [
   ProductProvider(
     title: 'Red Shirt',
