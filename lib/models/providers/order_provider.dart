@@ -61,6 +61,7 @@ class OrderListProvider with ChangeNotifier implements IOrder {
   List<OrderItem> _orderList = [];
 
   String? authToken;
+  String? userId;
 
   final Function defaultBuilder = (items) => items.fold(
       0.00, (previousValue, item) => (previousValue as double) + item.price);

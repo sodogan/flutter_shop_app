@@ -28,6 +28,7 @@ class ProductListProvider extends ListProvider with ChangeNotifier {
   List<ProductProvider> _productList = [];
 
   String? authToken;
+  String? userId;
 
 /* APP -WIDE FILTER -WE DO NOT WANT-WE NEED LOCAL FILTER SO COMMENTED OUT
   bool _isShowOnlyFavourites = false;
@@ -56,11 +57,10 @@ class ProductListProvider extends ListProvider with ChangeNotifier {
     );
   }
 
-  Future<void> fetchUserProducts(
-      {required String authToken, required String userId}) async {
+  Future<void> fetchUserProducts() async {
     try {
       final Map<String, dynamic> _products = await firebase.FirebaseUtility()
-          .fetchAllProductsFirebaseAsync(authToken: authToken, userId: userId);
+          .fetchAllProductsFirebaseAsync(authToken: authToken!, userId: userId);
 
       _loadProducts(products: _products);
       notifyListeners();
@@ -69,12 +69,11 @@ class ProductListProvider extends ListProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchAllProducts(
-      {required String authToken, required String userId}) async {
+  Future<void> fetchAllProducts() async {
     try {
       print('id token is: $authToken');
       final Map<String, dynamic> _products = await firebase.FirebaseUtility()
-          .fetchAllProductsFirebaseAsync(authToken: authToken);
+          .fetchAllProductsFirebaseAsync(authToken: authToken!);
 
       _loadProducts(products: _products);
 

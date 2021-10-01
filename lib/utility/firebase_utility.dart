@@ -13,13 +13,8 @@ class FirebaseUtility {
   //GET all the products
   Future<Map<String, dynamic>> fetchAllProductsFirebaseAsync(
       {String baseUrl = productsFireBaseURL,
-      String? authToken,
+      required String authToken,
       String? userId}) async {
-    /*Disable for token
-     Uri _url = authToken == null
-        ? Uri.parse(baseUrl)
-        : Uri.parse('$baseUrl?auth=$authToken');
-   */
     //for user specific GET request query
     String url = userId == null
         ? '$baseUrl?auth=$authToken'

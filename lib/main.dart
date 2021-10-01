@@ -27,25 +27,22 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<AuthProvider>(
           create: (context) => AuthProvider(),
         ),
-        ChangeNotifierProvider<ProductListProvider>(
-          create: (cntx) => ProductListProvider(),
-        ),
-        /*
         ChangeNotifierProxyProvider<AuthProvider, ProductListProvider>(
           create: (cntx) => ProductListProvider(),
-          update: (cntx, auth, previous) {
+          update: (cntx, auth, updatedProductListProvider) {
             print('Update is called***');
-            previous?.authToken = auth.idToken;
-            return previous!;
+            updatedProductListProvider?.authToken = auth.idToken;
+            updatedProductListProvider?.userId = auth.userID;
+            return updatedProductListProvider!;
           },
         ),
-        */
         ChangeNotifierProxyProvider<AuthProvider, OrderListProvider>(
           create: (cntx) => OrderListProvider(),
-          update: (cntx, auth, previous) {
+          update: (cntx, auth, updated) {
             print('Update is called***');
-            previous?.authToken = auth.idToken;
-            return previous!;
+            updated?.authToken = auth.idToken;
+            updated?.userId = auth.userID;
+            return updated!;
           },
         ),
         ChangeNotifierProvider(
