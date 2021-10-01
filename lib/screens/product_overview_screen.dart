@@ -51,6 +51,7 @@ class _ProductsOverviewScreenState extends State<ProductOverviewScreen> {
   void didChangeDependencies() {
     print('Did change dependencies called!');
     super.didChangeDependencies();
+    final _context = context;
     if (_isInit) {
       setState(() {
         _isLoading = true;
@@ -60,31 +61,43 @@ class _ProductsOverviewScreenState extends State<ProductOverviewScreen> {
         setState(() {
           _isLoading = false;
         });
-      }).catchError((err) {
-        showDialog(
-            context: context,
-            builder: (cntx) {
-              return AlertDialog(
-                title: const Text('Fetch Failed'),
-                content: Text(err.toString()),
-                actions: [
-                  TextButton(
-                    child: const Text('Okay'),
-                    onPressed: () {
-                      Navigator.of(cntx).pop();
-                    },
-                  )
-                ],
-              );
-            });
-      }).then((_) {
-        setState(() {
-          _isLoading = false;
-        });
       });
+      /*.catchError(
+        (err) {
+          showErrorDialog(err, _context).then(
+            (_) {
+              setState(
+                () {
+                  _isLoading = false;
+                },
+              );
+            },
+          ); //end show
+        },
+      );*/
     }
 
     _isInit = false;
+  }
+
+  Future<dynamic> showErrorDialog(err, BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (cntx) {
+        return AlertDialog(
+          title: const Text('Fetch Failed'),
+          content: Text(err.toString()),
+          actions: [
+            TextButton(
+              child: const Text('Okay'),
+              onPressed: () {
+                Navigator.of(cntx).pop();
+              },
+            )
+          ],
+        );
+      },
+    );
   }
 
   void onRefreshHandler() async {
@@ -94,7 +107,7 @@ class _ProductsOverviewScreenState extends State<ProductOverviewScreen> {
     });
     try {
       await Provider.of<ProductListProvider>(context, listen: false)
-          .fetchNewProducts();
+          .fetchUserProducts();
 
       setState(() {
         _isLoading = false;

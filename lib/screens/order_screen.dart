@@ -31,9 +31,10 @@ class _OrderScreenState extends State<OrderScreen> {
           Provider.of<order.OrderListProvider>(context, listen: false);
 
       try {
-        await _orderListProvider.fetchAllOrders();
-        setState(() {
-          _isLoading = false;
+        _orderListProvider.fetchAllOrders().then((value) {
+          setState(() {
+            _isLoading = false;
+          });
         });
       } catch (err) {
         setState(() {

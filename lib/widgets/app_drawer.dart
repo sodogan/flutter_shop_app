@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '/screens/order_screen.dart';
-import '/screens/manage_products_screen.dart';
+import '../screens/user_products_screen.dart';
 import 'package:provider/provider.dart';
 import '../models/providers/auth_provider.dart';
 
@@ -36,8 +36,7 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.settings),
             title: const Text('Manage Products'),
             onTap: () {
-              Navigator.pushReplacementNamed(
-                  context, ManageProductsScreen.route);
+              Navigator.pushReplacementNamed(context, UserProductsScreen.route);
             },
           ),
           const Divider(),

@@ -133,7 +133,7 @@ class _AuthCardState extends State<AuthCard> {
       }
 
       //if the authenticaition is succesfull navigate to the ProductOverview Screen
-      Navigator.of(context).pushReplacementNamed(ProductOverviewScreen.route);
+      // Navigator.of(context).pushReplacementNamed(ProductOverviewScreen.route);
     } catch (err) {
       //show the error message!
       await showDialog(

@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'dart:async';
 import '../../utility/firebase_utility.dart' as firebase;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider with ChangeNotifier {
   String? _userID;
@@ -31,9 +34,44 @@ class AuthProvider with ChangeNotifier {
           .signInUser(emailAddress: emailAddress, password: password);
 
       _parseResponse(result: _result);
-
+      //saveto device
+      await _saveToDevice();
       _autoLogout();
       notifyListeners();
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+  _decodeTokenFromDevice() async {
+    try {
+      //store the token in the device!
+      final _preferences = await SharedPreferences.getInstance();
+      if (!_preferences.containsKey('userPrefs')) {
+        return;
+      }
+      //save the data
+      final _prefs = _preferences.getString('userPrefs');
+      final Map<String, Object> _decoded =
+          jsonDecode(_prefs!) as Map<String, Object>;
+    } catch (err) {
+      rethrow;
+    }
+  }
+
+//Code to save to the Device!
+  Future<void> _saveToDevice() async {
+    try {
+      //store the token in the device!
+      final _preferences = await SharedPreferences.getInstance();
+      final _userPrefs = jsonEncode({
+        'userID': _userID,
+        'token': _idToken,
+        'expiryDate': _expiryDate?.toIso8601String()
+      });
+      print('Saving $_userPrefs into devicestorage ');
+      //save the data
+      _preferences.setString('userPrefs', _userPrefs);
     } catch (err) {
       rethrow;
     }
@@ -57,8 +95,9 @@ class AuthProvider with ChangeNotifier {
 
       _parseResponse(result: _result);
 
-      print('At the sign-up The token is $idToken');
-
+      //saveto device
+      await _saveToDevice();
+      _autoLogout();
       notifyListeners();
     } catch (err) {
       rethrow;
@@ -94,6 +133,6 @@ class AuthProvider with ChangeNotifier {
       _authTimer?.cancel();
     }
     final _timeToDifff = _expiryDate?.difference(DateTime.now()).inSeconds;
-    _authTimer = Timer(Duration(seconds: 2), logout);
+    _authTimer = Timer(Duration(seconds: _timeToDifff!), logout);
   }
 }

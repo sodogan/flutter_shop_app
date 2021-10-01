@@ -2,25 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_shop_app/screens/edit_product_screen.dart';
 import 'package:provider/provider.dart';
 import '../models/providers/product_list_provider.dart';
-import '../models/providers/auth_provider.dart';
 import '../models/common.dart';
 import '../widgets/app_drawer.dart';
-import '../widgets/manage_product_item.dart';
+import '../widgets/user_product_item.dart';
 
-class ManageProductsScreen extends StatefulWidget {
+class UserProductsScreen extends StatefulWidget {
   static const String route = '/manage-products';
 
-  const ManageProductsScreen({Key? key}) : super(key: key);
+  const UserProductsScreen({Key? key}) : super(key: key);
 
   @override
-  State<ManageProductsScreen> createState() => _ManageProductsScreenState();
+  State<UserProductsScreen> createState() => _UserProductsScreenState();
 }
 
-class _ManageProductsScreenState extends State<ManageProductsScreen> {
+class _UserProductsScreenState extends State<UserProductsScreen> {
   Future<void> onRefreshHandler() async {
     try {
+      /* Need to uncomment it out!
       await Provider.of<ProductListProvider>(context, listen: false)
-          .fetchNewProducts();
+          .fetchUserProducts();
+    */
+
     } catch (err) {
       showDialog(
           context: context,
@@ -65,7 +67,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
             return ListView.builder(
               itemCount: productListProvider.productList.length,
               itemBuilder: (context, index) {
-                return ManageProductItem(
+                return UserProductItem(
                   productListProvider: productListProvider,
                   index: index,
                 );

@@ -3,21 +3,21 @@ import '../models/providers/product_list_provider.dart';
 import '../models/common.dart';
 import '../screens/edit_product_screen.dart';
 
-class ManageProductItem extends StatefulWidget {
+class UserProductItem extends StatefulWidget {
   final ProductListProvider productListProvider;
   final int index;
 
-  const ManageProductItem({
+  const UserProductItem({
     Key? key,
     required this.productListProvider,
     required this.index,
   }) : super(key: key);
 
   @override
-  State<ManageProductItem> createState() => _ManageProductItemState();
+  State<UserProductItem> createState() => _UserProductItemState();
 }
 
-class _ManageProductItemState extends State<ManageProductItem> {
+class _UserProductItemState extends State<UserProductItem> {
   bool _isDeleting = false;
 
   void onDeleteHandler(BuildContext context, int index) async {
