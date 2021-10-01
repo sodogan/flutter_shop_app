@@ -56,33 +56,27 @@ class ProductListProvider extends ListProvider with ChangeNotifier {
     );
   }
 
-  Future<void> fetchNewProducts() async {
+  Future<void> fetchUserProducts(
+      {required String authToken, required String userId}) async {
     try {
       final Map<String, dynamic> _products = await firebase.FirebaseUtility()
-          .fetchAllProductsFirebaseAsync(idToken: authToken!);
+          .fetchAllProductsFirebaseAsync(authToken: authToken, userId: userId);
 
-      //transform the data which is a Map of Maps
-      _products.forEach((productID, value) {
-        final _index =
-            _productList.indexWhere((product) => product.id == productID);
-        if (_index == -1) {
-          value['id'] = productID;
-          final _product = ProductProvider.fromJSON(value);
-          _productList.add(_product);
-        }
-      });
+      _loadProducts(products: _products);
       notifyListeners();
     } catch (err) {
       rethrow;
     }
   }
 
-  Future<void> fetchAllProducts() async {
+  Future<void> fetchAllProducts(
+      {required String authToken, required String userId}) async {
     try {
+      print('id token is: $authToken');
       final Map<String, dynamic> _products = await firebase.FirebaseUtility()
-          .fetchAllProductsFirebaseAsync(idToken: authToken!);
+          .fetchAllProductsFirebaseAsync(authToken: authToken);
 
-      _loadNewProducts(products: _products);
+      _loadProducts(products: _products);
 
       notifyListeners();
     } catch (err) {
@@ -90,16 +84,14 @@ class ProductListProvider extends ListProvider with ChangeNotifier {
     }
   }
 
-  void _loadNewProducts({required Map<String, dynamic> products}) {
+  void _loadProducts({required Map<String, dynamic> products}) {
     //transform the data which is a Map of Maps
     print(_productList);
 
     products.forEach((productID, value) {
-      value['id'] = productID;
       //check if already exists
-
       if (!checkExists(productID: productID)) {
-        print('is here checking $productID');
+        value['id'] = productID;
         final _product = ProductProvider.fromJSON(value);
         // to read the isFavourite
         _product.isFavourite = value['isFavourite'];
@@ -200,6 +192,6 @@ class ProductListProvider extends ListProvider with ChangeNotifier {
   }
 
   bool checkExists({required String productID}) {
-    return productList.any((element) => element.id == productID);
+    return _productList.any((element) => element.id == productID);
   }
 }
