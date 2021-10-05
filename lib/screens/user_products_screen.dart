@@ -7,7 +7,7 @@ import '../widgets/app_drawer.dart';
 import '../widgets/user_product_item.dart';
 
 class UserProductsScreen extends StatefulWidget {
-  static const String route = '/manage-products';
+  static const String route = '/user-products';
 
   const UserProductsScreen({Key? key}) : super(key: key);
 
@@ -18,11 +18,9 @@ class UserProductsScreen extends StatefulWidget {
 class _UserProductsScreenState extends State<UserProductsScreen> {
   Future<void> onRefreshHandler() async {
     try {
-      /* Need to uncomment it out!
+      //Need to uncomment it out!
       await Provider.of<ProductListProvider>(context, listen: false)
-          .fetchUserProducts();
-    */
-
+          .fetchAndSetProducts(isUserBased: true);
     } catch (err) {
       showDialog(
           context: context,
@@ -45,7 +43,7 @@ class _UserProductsScreenState extends State<UserProductsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Products'),
+        title: const Text('User Products'),
         actions: [
           IconButton(
               icon: const Icon(

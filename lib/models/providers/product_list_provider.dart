@@ -57,46 +57,32 @@ class ProductListProvider extends ListProvider with ChangeNotifier {
     );
   }
 
-  Future<void> fetchUserProducts() async {
+  Future<void> fetchAndSetProducts({bool isUserBased = false}) async {
     try {
-      final Map<String, dynamic> _products = await firebase.FirebaseUtility()
-          .fetchAllProductsFirebaseAsync(authToken: authToken!, userId: userId);
+      List<ProductProvider> _loadedProducts = [];
+      Map<String, dynamic> _products;
+      if (isUserBased) {
+        _products = await firebase.FirebaseUtility()
+            .fetchAllProductsFirebaseAsync(
+                authToken: authToken!, userId: userId);
+      } else {
+        _products = await firebase.FirebaseUtility()
+            .fetchAllProductsFirebaseAsync(authToken: authToken!);
+      }
 
-      _loadProducts(products: _products);
-      notifyListeners();
-    } catch (err) {
-      rethrow;
-    }
-  }
-
-  Future<void> fetchAllProducts() async {
-    try {
-      print('id token is: $authToken');
-      final Map<String, dynamic> _products = await firebase.FirebaseUtility()
-          .fetchAllProductsFirebaseAsync(authToken: authToken!);
-
-      _loadProducts(products: _products);
-
-      notifyListeners();
-    } catch (err) {
-      rethrow;
-    }
-  }
-
-  void _loadProducts({required Map<String, dynamic> products}) {
-    //transform the data which is a Map of Maps
-    print(_productList);
-
-    products.forEach((productID, value) {
-      //check if already exists
-      if (!checkExists(productID: productID)) {
+      _products.forEach((productID, value) {
+        //check if already exists
         value['id'] = productID;
         final _product = ProductProvider.fromJSON(value);
         // to read the isFavourite
         _product.isFavourite = value['isFavourite'];
-        _productList.add(_product);
-      }
-    });
+        _loadedProducts.add(_product);
+      });
+      _productList = _loadedProducts;
+      notifyListeners();
+    } catch (err) {
+      rethrow;
+    }
   }
 
   @override
@@ -184,6 +170,11 @@ class ProductListProvider extends ListProvider with ChangeNotifier {
     } catch (err) {
       rethrow;
     }
+  }
+
+  void clearList() {
+    _productList.clear();
+    notifyListeners();
   }
 
   ProductProvider findFirsMatching({required String productID}) {

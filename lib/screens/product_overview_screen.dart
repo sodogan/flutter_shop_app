@@ -57,47 +57,34 @@ class _ProductsOverviewScreenState extends State<ProductOverviewScreen> {
         _isLoading = true;
       });
       //Fetch all the products
-      Provider.of<ProductListProvider>(context).fetchUserProducts().then((_) {
+      Provider.of<ProductListProvider>(context).fetchAndSetProducts().then((_) {
         setState(() {
           _isLoading = false;
         });
-      });
-      /*.catchError(
+      }).catchError(
         (err) {
-          showErrorDialog(err, _context).then(
-            (_) {
-              setState(
-                () {
-                  _isLoading = false;
-                },
+          showDialog(
+            context: context,
+            builder: (cntx) {
+              return AlertDialog(
+                title: const Text('Fetch Failed'),
+                content: Text(err.toString()),
+                actions: [
+                  TextButton(
+                    child: const Text('Okay'),
+                    onPressed: () {
+                      Navigator.of(cntx).pop();
+                    },
+                  )
+                ],
               );
             },
-          ); //end show
+          );
         },
-      );*/
+      );
     }
 
     _isInit = false;
-  }
-
-  Future<dynamic> showErrorDialog(err, BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (cntx) {
-        return AlertDialog(
-          title: const Text('Fetch Failed'),
-          content: Text(err.toString()),
-          actions: [
-            TextButton(
-              child: const Text('Okay'),
-              onPressed: () {
-                Navigator.of(cntx).pop();
-              },
-            )
-          ],
-        );
-      },
-    );
   }
 
   void onRefreshHandler() async {
@@ -107,7 +94,7 @@ class _ProductsOverviewScreenState extends State<ProductOverviewScreen> {
     });
     try {
       await Provider.of<ProductListProvider>(context, listen: false)
-          .fetchUserProducts();
+          .fetchAndSetProducts();
 
       setState(() {
         _isLoading = false;

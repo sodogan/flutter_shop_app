@@ -30,7 +30,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProxyProvider<AuthProvider, ProductListProvider>(
           create: (cntx) => ProductListProvider(),
           update: (cntx, auth, updatedProductListProvider) {
-            print('Update is called***');
+            print(
+                'Main screen setting the authtoken for productlistprovider is called***');
             updatedProductListProvider?.authToken = auth.idToken;
             updatedProductListProvider?.userId = auth.userID;
             return updatedProductListProvider!;
