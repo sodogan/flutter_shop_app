@@ -11,6 +11,7 @@ import 'models/providers/product_list_provider.dart';
 import 'models/providers/cart_provider.dart';
 import 'models/providers/order_provider.dart';
 import 'models/providers/auth_provider.dart';
+import './widgets/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -67,7 +68,15 @@ class MyApp extends StatelessWidget {
           routes: {
             '/': (ctx) => authprovider.isAuthenticated
                 ? const ProductOverviewScreen()
-                : const AuthScreen(),
+                : FutureBuilder(
+                    future: Future.delayed(Duration(seconds: 3),
+                        () => authprovider.tryAutoLogin()),
+                    builder: (context, asyncSnapshot) {
+                      return asyncSnapshot.connectionState ==
+                              ConnectionState.waiting
+                          ? SplashScreen()
+                          : const AuthScreen();
+                    }),
             ProductOverviewScreen.route: (context) =>
                 const ProductOverviewScreen(),
             ProductDetailsScreen.route: (context) =>

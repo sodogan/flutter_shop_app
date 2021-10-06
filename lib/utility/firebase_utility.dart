@@ -10,7 +10,7 @@ class FirebaseUtility {
   static const ordersFireBaseURL =
       'https://flutter-eshop-c6583-default-rtdb.firebaseio.com/orders.json';
 
-  //GET all the products
+  //GET all the products:either per user or all products
   Future<Map<String, dynamic>> fetchAllProductsFirebaseAsync(
       {String baseUrl = productsFireBaseURL,
       required String authToken,

@@ -6,17 +6,33 @@ import '../models/common.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/user_product_item.dart';
 
-class UserProductsScreen extends StatefulWidget {
+class UserProductsScreen extends StatelessWidget {
   static const String route = '/user-products';
 
   const UserProductsScreen({Key? key}) : super(key: key);
 
+  /*
   @override
-  State<UserProductsScreen> createState() => _UserProductsScreenState();
-}
+  initState() {
+    super.initState();
 
-class _UserProductsScreenState extends State<UserProductsScreen> {
-  Future<void> onRefreshHandler() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    Future.delayed(Duration(seconds: 3), () {
+      Provider.of<ProductListProvider>(context, listen: false)
+          .fetchAndSetProducts(isUserBased: true);
+    }).then((_) {
+      setState(() {
+        _isLoading = false;
+      });
+    });
+  
+}
+*/
+
+  Future<void> _onRefreshProducts({required BuildContext context}) async {
     try {
       //Need to uncomment it out!
       await Provider.of<ProductListProvider>(context, listen: false)
@@ -58,21 +74,33 @@ class _UserProductsScreenState extends State<UserProductsScreen> {
               }),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: onRefreshHandler,
-        child: Consumer<ProductListProvider>(
-          builder: (context, productListProvider, chld) {
-            return ListView.builder(
-              itemCount: productListProvider.productList.length,
-              itemBuilder: (context, index) {
-                return UserProductItem(
-                  productListProvider: productListProvider,
-                  index: index,
+      body: FutureBuilder(
+        future: _onRefreshProducts(context: context),
+        builder: (context, asyncSnapshot) {
+          return asyncSnapshot.connectionState == ConnectionState.waiting
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : RefreshIndicator(
+                  onRefresh: () => _onRefreshProducts(context: context),
+                  child: Consumer<ProductListProvider>(
+                    builder: (context, productListProvider, chld) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ListView.builder(
+                          itemCount: productListProvider.productList.length,
+                          itemBuilder: (context, index) {
+                            return UserProductItem(
+                              productListProvider: productListProvider,
+                              index: index,
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 );
-              },
-            );
-          },
-        ),
+        },
       ),
       drawer: const AppDrawer(),
     );
